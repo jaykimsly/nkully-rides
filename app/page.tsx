@@ -1,13 +1,34 @@
 "use client";
 
-import { useState } from "react";
+import "./nkully.css";
+import { useMemo, useState } from "react";
 
 export default function Home() {
   const routes = [
-    { id: 1, route: "Barberton → Mbombela", price: 700 },
-    { id: 2, route: "Barberton → White River", price: 850 },
-    { id: 3, route: "Barberton → KaNyamazane", price: 850 },
-    { id: 4, route: "Barberton → Matsulu", price: 800 },
+    { from: "Location", to: "Town", price: 80 },
+    { from: "Town", to: "Location", price: 80 },
+    { from: "Ext 18", to: "Town", price: 90 },
+    { from: "Kakhaleni", to: "Town", price: 120 },
+    { from: "Location", to: "Kakhaleni", price: 160 },
+    { from: "Emtjindini", to: "Town", price: 200 },
+    { from: "Bhohili", to: "Town", price: 200 },
+    { from: "Jele Farm", to: "Town", price: 120 },
+    { from: "Town", to: "Caldonia", price: 190 },
+    { from: "Location", to: "Caldonia", price: 200 },
+    { from: "Anges Mine", to: "Town", price: 350 },
+    { from: "Shiba Mine", to: "Town", price: 550 },
+    { from: "Matsulu", to: "Barberton", price: 900 },
+    { from: "Malelane", to: "Barberton", price: 1200 },
+    { from: "Mbombela", to: "Barberton", price: 700 },
+    { from: "White River", to: "Barberton", price: 850 },
+    { from: "Consort Mine", to: "Town", price: 450 },
+    { from: "Town", to: "Dikbas", price: 80 },
+    { from: "Location", to: "Dikbas", price: 90 },
+    { from: "Town", to: "Fairview", price: 200 },
+    { from: "Town", to: "Diggers Retreat", price: 300 },
+    { from: "Barberton", to: "Badplaas", price: 1100 },
+    { from: "Barberton", to: "Nhlazatshe", price: 1500 },
+    { from: "Barberton", to: "Oshoek", price: 1900 },
   ];
 
   const [route, setRoute] = useState("");
@@ -17,34 +38,51 @@ export default function Home() {
   const [destination, setDestination] = useState("");
   const [payment, setPayment] = useState("Cash");
 
-  const selectedRoute = routes.find(
-    (r) => r.route === route
+  const selectedRoute = useMemo(
+    () =>
+      routes.find(
+        (r) => `${r.from} → ${r.to}` === route
+      ),
+    [route]
   );
 
-  const handleRequest = () => {
+  const fare = useMemo(() => {
+    if (!selectedRoute) return 0;
+
+    const hour = new Date().getHours();
+    const night = hour >= 19 || hour < 5;
+
+    return night
+      ? selectedRoute.price * 2
+      : selectedRoute.price;
+  }, [selectedRoute]);
+
+  function requestRide() {
     if (
-      !route ||
       !name ||
       !phone ||
       !pickup ||
-      !destination
+      !destination ||
+      !route
     ) {
-      alert("Please complete all fields.");
+      alert("Please complete all fields");
       return;
     }
 
-    const message = `🚖 NEW NKULLY RIDE REQUEST
+    const message = `
+NKULLY'S SERVICES BOOKING
 
 Name: ${name}
 Phone: ${phone}
 
 Route: ${route}
-Price: R${selectedRoute?.price}
 
 Pickup: ${pickup}
 Destination: ${destination}
 
 Payment: ${payment}
+
+Fare: R${fare}
 `;
 
     window.open(
@@ -53,135 +91,131 @@ Payment: ${payment}
       )}`,
       "_blank"
     );
-  };
+  }
 
   return (
-    <main className="min-h-screen bg-gray-100 p-6">
-      <div className="max-w-md mx-auto bg-white p-6 rounded-xl shadow">
+    <main className="page">
 
-        <h1 className="text-3xl font-bold text-center">
-          Nkully Rides
-        </h1>
+      <section className="hero">
+        <h1>👑 NKULLY'S SERVICES</h1>
+        <p>Comfort • Safety • Reliability</p>
+      </section>
 
-        <p className="text-center text-gray-500 mb-6">
-          Safe & Reliable Transport
-        </p>
+      <div className="container">
 
-        <div className="space-y-4">
+        <img
+          src="/flyer.jpg"
+          alt="Flyer"
+          className="flyer"
+        />
 
-          <select
-            value={route}
-            onChange={(e) => setRoute(e.target.value)}
-            className="w-full border p-3 rounded"
-          >
-            <option value="">
-              Select Route
-            </option>
+        <div className="card">
 
-            {routes.map((r) => (
-              <option
-                key={r.id}
-                value={r.route}
-              >
-                {r.route} - R{r.price}
-              </option>
-            ))}
-          </select>
-
-          {selectedRoute && (
-            <div className="bg-green-100 p-3 rounded">
-              Price: R{selectedRoute.price}
-            </div>
-          )}
+          <h2>Request A Ride</h2>
 
           <input
-            type="text"
+            className="input"
             placeholder="Full Name"
             value={name}
             onChange={(e) =>
               setName(e.target.value)
             }
-            className="w-full border p-3 rounded"
           />
 
           <input
-            type="tel"
+            className="input"
             placeholder="Phone Number"
             value={phone}
             onChange={(e) =>
               setPhone(e.target.value)
             }
-            className="w-full border p-3 rounded"
           />
 
           <input
-            type="text"
+            className="input"
             placeholder="Pickup Location"
             value={pickup}
             onChange={(e) =>
               setPickup(e.target.value)
             }
-            className="w-full border p-3 rounded"
           />
 
           <input
-            type="text"
+            className="input"
             placeholder="Destination"
             value={destination}
             onChange={(e) =>
               setDestination(e.target.value)
             }
-            className="w-full border p-3 rounded"
           />
 
-          <div>
-            <label className="font-medium">
-              Payment Method
-            </label>
+          <select
+            className="select"
+            value={route}
+            onChange={(e) =>
+              setRoute(e.target.value)
+            }
+          >
+            <option value="">
+              Select Route
+            </option>
 
-            <select
-              value={payment}
-              onChange={(e) =>
-                setPayment(e.target.value)
-              }
-              className="w-full border p-3 rounded mt-2"
-            >
-              <option value="Cash">
-                Cash
+            {routes.map((r, i) => (
+              <option
+                key={i}
+                value={`${r.from} → ${r.to}`}
+              >
+                {r.from} → {r.to} (R{r.price})
               </option>
-              <option value="PayShap">
-                PayShap
-              </option>
-            </select>
-          </div>
+            ))}
+          </select>
+
+          <select
+            className="select"
+            value={payment}
+            onChange={(e) =>
+              setPayment(e.target.value)
+            }
+          >
+            <option>Cash</option>
+            <option>PayShap</option>
+          </select>
+
+          {selectedRoute && (
+            <div className="price-box">
+              <strong>Fare:</strong> R{fare}
+            </div>
+          )}
 
           {payment === "PayShap" && (
-            <div className="bg-yellow-100 p-4 rounded">
-              <h3 className="font-bold">
-                PayShap Details
-              </h3>
-
-              <p>
-                Number: 066 497 0017
-              </p>
-
-              <p>
-                Reference: Your Phone Number
-              </p>
+            <div className="payment-box">
+              <strong>PayShap Number:</strong>
+              <br />
+              066 497 0017
+              <br />
+              Reference: Phone Number
             </div>
           )}
 
           <button
-            onClick={handleRequest}
-            className="w-full bg-black text-white p-3 rounded"
+            className="button"
+            onClick={requestRide}
           >
-            Request Ride
+            REQUEST RIDE
           </button>
 
         </div>
+
+        <div className="contact">
+          <h2>Contact Us</h2>
+          <p>📞 066 497 0017</p>
+          <p>📞 081 377 7149</p>
+          <br />
+          <p>Local Rides • Long Distance</p>
+        </div>
+
       </div>
+
     </main>
   );
 }
-
-
